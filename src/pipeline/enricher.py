@@ -24,6 +24,22 @@ def _load_prompt_template(path: str = "config/enrichment_prompt.txt") -> str:
         return f.read()
 
 
+def _validated_str(value) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return str(value)
+    return value.strip() or None
+
+
+def _validated_score(value) -> int | None:
+    try:
+        score = int(value)
+        return score if 1 <= score <= 10 else None
+    except (TypeError, ValueError):
+        return None
+
+
 def _safe(value) -> object:
     """Convert pandas NaN / numpy NaN to None so json.dumps produces null, not NaN."""
     try:
@@ -131,10 +147,10 @@ def enrich(df: pd.DataFrame, config: dict) -> pd.DataFrame:
     for idx, row in df.iterrows():
         result = enrichment_map.get(row["id"])
         if result:
-            df.at[idx, "ai_summary"] = result.get("summary")
-            df.at[idx, "ai_genre_tags"] = result.get("genre_tags")
-            df.at[idx, "ai_hype_score"] = result.get("hype_score")
-            df.at[idx, "ai_play_recommendation"] = result.get("play_recommendation")
+            df.at[idx, "ai_summary"] = _validated_str(result.get("summary"))
+            df.at[idx, "ai_genre_tags"] = _validated_str(result.get("genre_tags"))
+            df.at[idx, "ai_hype_score"] = _validated_score(result.get("hype_score"))
+            df.at[idx, "ai_play_recommendation"] = _validated_str(result.get("play_recommendation"))
 
     enriched_count = df["ai_summary"].notna().sum()
     logger.info(f"Enrichment complete: {enriched_count}/{len(df)} records enriched")

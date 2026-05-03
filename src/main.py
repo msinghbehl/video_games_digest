@@ -13,11 +13,23 @@ from src.reports import generator
 
 logger = get_logger(__name__)
 
+REQUIRED_ENV_VARS = ["ANTHROPIC_API_KEY", "RAWG_API_KEY", "GOOGLE_SERVICE_ACCOUNT_JSON"]
+
+
+def _validate_env() -> None:
+    missing = [v for v in REQUIRED_ENV_VARS if not os.environ.get(v)]
+    if missing:
+        raise EnvironmentError(
+            f"Missing required environment variables: {', '.join(missing)}\n"
+            "Copy .env.example to .env and fill in the values."
+        )
+
 
 def run() -> None:
     start = time.time()
     logger.info("FlowForge pipeline starting")
 
+    _validate_env()
     config = load_config()
     sources_cfg = config["sources"]
     pipeline_cfg = config["pipeline"]
