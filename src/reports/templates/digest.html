@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowForge Gaming Digest — {{ stats.run_date }}</title>
+  <style>
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --surface-2: #22222f;
+      --accent: #7c5cbf;
+      --accent-2: #c084fc;
+      --text: #e2e0f0;
+      --text-muted: #9490b0;
+      --score-high: #4ade80;
+      --score-mid: #facc15;
+      --score-low: #f87171;
+      --radius: 10px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; line-height: 1.6; padding: 2rem; }
+    h1 { font-size: 2rem; font-weight: 800; color: var(--accent-2); margin-bottom: 0.25rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2.5rem; }
+    h2 { font-size: 1.1rem; font-weight: 700; color: var(--accent-2); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .stat-card { background: var(--surface); border-radius: var(--radius); padding: 1.2rem 1.4rem; }
+    .stat-card .value { font-size: 2rem; font-weight: 800; color: var(--accent-2); }
+    .stat-card .label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .section { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 2rem; }
+    .game-card { background: var(--surface-2); border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 0.8rem; display: flex; gap: 1rem; align-items: flex-start; }
+    .rank { font-size: 1.4rem; font-weight: 900; color: var(--accent); min-width: 2rem; padding-top: 0.1rem; }
+    .game-info { flex: 1; }
+    .game-title { font-weight: 700; font-size: 1rem; color: var(--text); }
+    .game-meta { font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0 0.5rem; }
+    .game-summary { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+    .game-rec { font-size: 0.82rem; color: var(--accent-2); font-style: italic; }
+    .score-badge { border-radius: 6px; padding: 0.2rem 0.6rem; font-size: 0.85rem; font-weight: 800; min-width: 2.5rem; text-align: center; }
+    .score-high { background: rgba(74,222,128,0.15); color: var(--score-high); }
+    .score-mid  { background: rgba(250,204,21,0.15); color: var(--score-mid); }
+    .score-low  { background: rgba(248,113,113,0.15); color: var(--score-low); }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+    .tag { background: rgba(124,92,191,0.2); color: var(--accent-2); border-radius: 4px; padding: 0.1rem 0.5rem; font-size: 0.72rem; }
+    .source-pill { border-radius: 4px; padding: 0.1rem 0.5rem; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+    .source-rawg        { background: rgba(96,165,250,0.15); color: #60a5fa; }
+    .source-metacritic  { background: rgba(251,146,60,0.15); color: #fb923c; }
+    .source-games_played { background: rgba(74,222,128,0.15); color: #4ade80; }
+    .genre-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .source-stat { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+    .source-stat:last-child { border-bottom: none; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    th { text-align: left; padding: 0.6rem 0.8rem; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    td { padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+  </style>
+</head>
+<body>
+
+<h1>FlowForge Gaming Digest</h1>
+<p class="subtitle">Generated {{ stats.run_date }} &nbsp;·&nbsp; {{ stats.total_records }} games across all sources</p>
+
+<!-- Summary stats -->
+<div class="grid">
+  <div class="stat-card">
+    <div class="value">{{ stats.total_records }}</div>
+    <div class="label">Total Games</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">{{ stats.avg_hype_score or "—" }}</div>
+    <div class="label">Avg Hype Score</div>
+  </div>
+  {% for source, count in stats.by_source.items() %}
+  <div class="stat-card">
+    <div class="value">{{ count }}</div>
+    <div class="label">{{ source | replace("_", " ") | title }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Top 10 -->
+<div class="section">
+  <h2>Top 10 by Hype Score</h2>
+  {% for game in stats.top_10 %}
+  {% set score = game.ai_hype_score | int if game.ai_hype_score else 0 %}
+  <div class="game-card">
+    <div class="rank">#{{ loop.index }}</div>
+    <div class="game-info">
+      <div class="game-title">{{ game.title }}</div>
+      <div class="game-meta">
+        <span class="source-pill source-{{ game.source }}">{{ game.source | replace("_", " ") }}</span>
+        {% if game.ai_genre_tags %}
+        <span style="margin-left:0.4rem; color: var(--text-muted);">{{ game.ai_genre_tags }}</span>
+        {% endif %}
+      </div>
+      {% if game.ai_play_recommendation %}
+      <div class="game-rec">{{ game.ai_play_recommendation }}</div>
+      {% endif %}
+    </div>
+    <div class="score-badge {% if score >= 8 %}score-high{% elif score >= 5 %}score-mid{% else %}score-low{% endif %}">
+      {{ game.ai_hype_score or "—" }}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Genre Distribution -->
+{% if stats.genre_distribution %}
+<div class="section">
+  <h2>Genre Breakdown</h2>
+  <div class="genre-list">
+    {% for genre, count in stats.genre_distribution.items() %}
+    <span class="tag">{{ genre }} ({{ count }})</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Finished Games from personal log -->
+{% if stats.finished_games %}
+<div class="section">
+  <h2>Your Finished Games</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Your Rating</th>
+        <th>AI Summary</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in stats.finished_games %}
+      <tr>
+        <td style="font-weight:600;">{{ game.title }}</td>
+        <td>{{ game.personal_rating or "—" }}</td>
+        <td style="color:var(--text-muted);">{{ game.ai_summary or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- Full table -->
+<div class="section">
+  <h2>All Games</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Source</th>
+        <th>Hype</th>
+        <th>Genres</th>
+        <th>Summary</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in records %}
+      {% set score = game.ai_hype_score | int if game.ai_hype_score else 0 %}
+      <tr>
+        <td style="font-weight:600; min-width:160px;">{{ game.title }}</td>
+        <td><span class="source-pill source-{{ game.source }}">{{ game.source | replace("_"," ") }}</span></td>
+        <td>
+          <span class="score-badge {% if score >= 8 %}score-high{% elif score >= 5 %}score-mid{% else %}score-low{% endif %}">
+            {{ game.ai_hype_score or "—" }}
+          </span>
+        </td>
+        <td style="color:var(--text-muted); font-size:0.78rem; max-width:180px;">{{ game.ai_genre_tags or "—" }}</td>
+        <td style="color:var(--text-muted); font-size:0.8rem; max-width:280px;">{{ game.ai_summary or "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

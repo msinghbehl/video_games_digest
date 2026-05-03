@@ -1,0 +1,44 @@
+pipeline:
+  max_records_per_source: 40
+  enrichment_batch_size: 8
+  max_enrichment_records: 100
+
+sources:
+  rawg:
+    enabled: true
+    ordering: "-rating"   # -rating | -added | -released | -metacritic
+    page_size: 40
+
+  metacritic_csv:
+    enabled: true
+    path: "data/raw/metacritic_top_games.csv"
+    column_map:
+      title: "title"
+      platform: "platforms"
+      critic_score: "metascore"
+      release_date: "releaseDate"
+      genre: "genres"
+      url: "url"
+
+  games_played:
+    enabled: true
+    spreadsheet_name: "FlowForge - Games Played"
+    sheet_tab: "Sheet1"
+    column_map:
+      title: "Title"
+      platform: "Platform"
+      personal_rating: "Your Rating"
+      status: "Status"
+      notes: "Notes"
+      release_date: "Started"
+
+ai:
+  model: "claude-haiku-4-5-20251001"
+  max_tokens: 4096
+
+output:
+  report_formats:
+    - csv
+    - html
+  reports_dir: "output/reports"
+  logs_dir: "output/logs"

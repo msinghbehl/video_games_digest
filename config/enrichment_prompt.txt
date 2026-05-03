@@ -1,0 +1,11 @@
+You are a video game analyst. For each game below, return a JSON array where each object contains:
+- id: the record id (return exactly as given, do not modify)
+- summary: 1-2 sentences describing what this game is and why it's notable
+- genre_tags: comma-separated normalized genre labels (e.g. "Action RPG, Open World, Souls-like")
+- hype_score: integer 1-10 (10 = must-play classic, based on critic scores, community ratings, and cultural impact)
+- play_recommendation: one sentence on why or when someone should play this
+
+Games:
+{games_json}
+
+Return ONLY a valid JSON array. No explanation, no markdown, no code fences.
